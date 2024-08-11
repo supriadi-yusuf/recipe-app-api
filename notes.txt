@@ -1,0 +1,109 @@
+D o c k e r
+===========
+file to create docker image :
+Dockerfile
+.dockerignore
+
+create docker image :
+docker build -t [name:tag] [context => directory wher docker file exists]
+ex : docker build -t main-app:123 .
+
+
+docker compose
+==============
+docker compose syntax version 3.9 will be used
+service name : app
+context : current directory
+map port of local machine to port docker container
+volume : map directory on local machime to directory on docker container
+
+build docker image with docker compose :
+docker-compose build
+
+start with docker-compose service :
+docker-compose up
+
+linting
+=======
+check python code and format
+using flake8
+.flake8 is a file to configure flake8, ex : we can exclude files or folders for linting process
+
+docker-compose run --rm [service name] sh -c "flake8"
+
+
+test
+====
+using Django test suite
+create new package called tests
+
+python manage.py test
+
+or with docker compose :
+docker-compose run --rm app sh -c "python manage.py test"
+
+
+
+
+django
+======
+create django project :
+django admin startproject [name] [directory], ex : django-admin startproject my-prj my-folder
+
+with docker-compose on current docker :
+docker-compose run --rm main-app sh -c "django-admin startproject my_api_prj ."
+
+create app :
+python manage.py startapp [application], ex : python manage.py startapp core
+with docker compose on current project : docker-compose run --rm main-app sh -c "python manage.py core"
+
+in core folder :
+- delete tests.py
+- delete views.py
+- create package tests
+
+install app core into settings.py (INSTALLED_APPS)
+
+creating custom django command in core app :
+1. create package management on core app
+2. create package commands in package management
+3. create wait_for_Db.py
+
+install package psycopg2 : https://pypi.org/project/psycopg2/
+
+implement wait for wait for db
+===============================
+
+run unit test : docker-compose run --rm main-app sh -c "python manage.py test"
+
+run wait for db : docker-compose run --rm main-app sh -c "python manage.py wait_for_db"
+
+run linting
+===========
+docker-compose run --rm main-app sh -c "python manage.py wait_for_db && flake8"
+
+tell flake8 to ignore error with  # noqa
+
+migrations
+===========
+python manage.py makemigrations
+python manage.py migrate
+
+inconsistency migration history database => clear volueme :
+docker volume ls
+docker volume rm [volumn name] => if volumn is used we have to run docker-compose down
+
+wait for db before migration :
+python manage.py wait_for_db && python manage.py migrate
+
+create super user :
+python manage.py createsuperuser
+
+login into app :
+http://localhost:8000/admin/login/?next=/admin/
+
+reverse() function documentation :
+https://docs.djangoproject.com/en/3.1/ref/contrib/admin/#reversing-admin-urls
+
+https://github.com/LondonAppDeveloper/c2-recipe-app-api-2
+
